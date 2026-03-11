@@ -54,7 +54,7 @@ export default async function handler(req, res) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // CV oluşturmak için en hızlı, en ucuz ve en etkili model
+        model: 'claude-3-haiku-20240307', // CV oluşturmak için en hızlı ve en etkili model
         max_tokens: 1500,
         system: systemPrompt,
         messages: [
