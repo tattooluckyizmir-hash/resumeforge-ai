@@ -1,1206 +1,220 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ResumeForge AI — Global CV Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<style>
-:root {
-  --bg:#0b0b0d;--surface:#131315;--surface2:#1a1a1d;--surface3:#222226;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
-  --gold:#e8c547;--gold2:#f5d96b;--cream:#ededf4;
-  --muted:#55555f;--muted2:#88889a;
-  --red:#e05252;--green:#52c47a;--blue:#5285e0;--text:#dddde8;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:0.025;pointer-events:none;z-index:9999}
-
-/* LAYOUT */
-.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-
-/* SIDEBAR */
-.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.logo-icon{width:34px;height:34px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.logo-text .name{font-size:15px;font-weight:800;color:var(--cream);letter-spacing:-0.01em}
-.logo-text .sub{font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:1px}
-
-.s-section{padding:16px 12px 4px}
-.s-label{font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);padding:0 8px;margin-bottom:6px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted2);transition:all .15s;margin-bottom:1px;border:1px solid transparent}
-.nav-item:hover{background:var(--surface2);color:var(--text)}
-.nav-item.active{background:rgba(232,197,71,.1);color:var(--gold);border-color:rgba(232,197,71,.15)}
-.nav-item .ico{font-size:15px;width:18px;text-align:center}
-
-/* TEMPLATE GRID */
-.tpl-wrap{padding:8px 12px 16px}
-.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.tpl-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:6px 5px 5px;cursor:pointer;text-align:center;transition:all .15s;position:relative}
-.tpl-card:hover{border-color:var(--border2)}
-.tpl-card.selected{border-color:var(--gold);background:rgba(232,197,71,.07)}
-.tpl-card.selected::after{content:'✓';position:absolute;top:3px;right:5px;font-size:9px;color:var(--gold);font-weight:800}
-.tpl-preview{width:100%;aspect-ratio:7/9;border-radius:3px;overflow:hidden;display:flex;flex-direction:column;gap:1.5px;padding:3px;margin-bottom:4px}
-.tl{height:3px;border-radius:1.5px;background:rgba(255,255,255,.1)}
-.tpl-name{font-size:9px;color:var(--muted2);font-weight:700;letter-spacing:.03em}
-
-/* MAIN */
-.main{display:flex;flex-direction:column;min-height:100vh}
-
-/* TOPBAR */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100}
-.topbar-left .t{font-size:15px;font-weight:700;color:var(--cream)}
-.topbar-left .s{font-size:11px;color:var(--muted);margin-top:1px}
-.topbar-right{display:flex;gap:8px;align-items:center}
-
-/* LANG DROPDOWN */
-.lang-select-wrap{position:relative}
-.lang-select-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text);transition:.15s;min-width:140px;justify-content:space-between}
-.lang-select-btn:hover{border-color:rgba(232,197,71,.3)}
-.lang-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;min-width:200px;max-height:320px;overflow-y:auto;z-index:200;box-shadow:0 16px 40px rgba(0,0,0,.5);display:none}
-.lang-dropdown.open{display:block}
-.lang-option{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;font-size:13px;font-weight:500;transition:.1s;border-radius:0}
-.lang-option:hover{background:rgba(255,255,255,.05)}
-.lang-option.selected{color:var(--gold)}
-.lang-flag{font-size:16px;width:22px}
-
-.btn{padding:8px 16px;border-radius:7px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;display:flex;align-items:center;gap:6px}
-.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
-.btn-ghost:hover{background:var(--surface3)}
-.btn-gold{background:var(--gold);color:#0b0b0d}
-.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 20px rgba(232,197,71,.25)}
-
-/* CONTENT */
-.content{display:grid;grid-template-columns:1fr 1fr;flex:1}
-
-/* FORM PANEL */
-.form-panel{padding:28px;border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 65px)}
-.panel-hd{font-size:12px;font-weight:700;color:var(--cream);margin-bottom:18px;display:flex;align-items:center;gap:7px;letter-spacing:.02em}
-.panel-hd::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px}
-.fg{margin-bottom:15px}
-.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-label{display:block;font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
-input,textarea,select{width:100%;padding:10px 13px;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;transition:.15s;outline:none}
-input:focus,textarea:focus,select:focus{border-color:rgba(232,197,71,.4);background:var(--surface);box-shadow:0 0 0 3px rgba(232,197,71,.06)}
-select option{background:var(--surface2)}
-textarea{resize:vertical;min-height:80px;line-height:1.6}
-.divider{height:1px;background:var(--border);margin:20px 0;position:relative}
-.divider span{position:absolute;top:50%;left:0;transform:translateY(-50%);background:var(--surface);padding-right:10px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
-
-.gen-btn{width:100%;padding:14px;background:var(--gold);color:#0b0b0d;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:.2s;position:relative;overflow:hidden;margin-top:6px;letter-spacing:.03em}
-.gen-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 12px 32px rgba(232,197,71,.3)}
-.gen-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.gen-btn .sp{display:none;width:18px;height:18px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
-.gen-btn.loading .bt{display:none}.gen-btn.loading .sp{display:block}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* OUTPUT */
-.output-panel{display:flex;flex-direction:column;max-height:calc(100vh - 65px);overflow:hidden}
-.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;gap:0;overflow-x:auto}
-.tab{padding:13px 16px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap;letter-spacing:.02em}
-.tab:hover{color:var(--text)}.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-.tab-content{flex:1;overflow-y:auto}
-.tab-panel{display:none;padding:24px}.tab-panel.active{display:block}
-
-/* EMPTY */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 32px;text-align:center;color:var(--muted);gap:10px}
-.empty .ei{font-size:44px;opacity:.4}
-.empty .et{font-size:15px;font-weight:700;color:var(--muted2)}
-.empty .ed{font-size:12px;line-height:1.6;max-width:240px}
-
-/* PROGRESS */
-.prog-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),#e05252);border-radius:2px;width:0%;transition:width .3s}
-
-/* CV OUTPUT */
-.cv-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:28px;min-height:380px;font-size:13px;line-height:1.75}
-
-/* ATS */
-.ats-ring-wrap{display:flex;flex-direction:column;align-items:center;padding:28px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:16px}
-.ring-rel{position:relative;width:130px;height:130px;margin-bottom:12px}
-.ring-rel svg{transform:rotate(-90deg)}
-.ring-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:9}
-.ring-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
-.ring-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
-.rn{font-family:'Playfair Display',serif;font-size:34px;line-height:1}
-.rl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.ats-checks{display:flex;flex-direction:column;gap:8px}
-.ats-chk{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px}
-.chk-ico{font-size:15px;width:22px;text-align:center;flex-shrink:0}
-.chk-txt{flex:1}.chk-title{font-size:12px;font-weight:700;color:var(--text)}.chk-desc{font-size:11px;color:var(--muted);margin-top:1px}
-.chk-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
-.bp{background:rgba(82,196,122,.12);color:var(--green)}.bw{background:rgba(232,197,71,.12);color:var(--gold)}.bf{background:rgba(224,82,82,.12);color:var(--red)}
-
-/* COVER / LINKEDIN */
-.cover-box,.li-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;font-size:13px;line-height:1.75;color:var(--text);min-height:80px}
-.li-section{margin-bottom:18px}
-.li-title{font-size:12px;font-weight:700;color:var(--cream);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{padding:4px 11px;border-radius:100px;font-size:11px;font-weight:700;background:rgba(232,197,71,.1);border:1px solid rgba(232,197,71,.2);color:var(--gold)}
-.chip.miss{background:rgba(224,82,82,.1);border-color:rgba(224,82,82,.2);color:var(--red)}
-
-/* CHAT */
-.chat-wrap{display:flex;flex-direction:column;gap:12px}
-.msgs{display:flex;flex-direction:column;gap:11px;max-height:360px;overflow-y:auto;padding-bottom:4px}
-.msg{display:flex;gap:9px;align-items:flex-start}
-.av{width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
-.msg.ai .av{background:var(--gold);color:#0b0b0d}
-.msg.hu .av{background:var(--surface3);color:var(--text)}
-.bubble{padding:9px 13px;border-radius:9px;font-size:12px;line-height:1.6;max-width:88%}
-.msg.ai .bubble{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
-.msg.hu .bubble{background:rgba(232,197,71,.09);border:1px solid rgba(232,197,71,.18);color:var(--cream)}
-.chat-input-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-.chat-in{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;outline:none}
-.chat-in:focus{border-color:rgba(232,197,71,.4)}
-.send-btn{padding:9px 16px;background:var(--gold);color:#0b0b0d;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0}
-.send-btn:hover{background:var(--gold2)}
-
-/* TEMPLATE STYLES */
-.tpl-minimal h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#111;margin-bottom:2px}
-.tpl-minimal h2{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:#aaa;border-bottom:1px solid #eee;padding-bottom:5px;margin:16px 0 9px}
-.tpl-minimal h3{font-size:13px;font-weight:700;color:#1a1a1a}
-.tpl-minimal p,.tpl-minimal li{color:#444}
-
-.tpl-classic h1{font-family:'Playfair Display',serif;font-size:26px;color:#1a1a2e;margin-bottom:2px}
-.tpl-classic h2{font-family:'Playfair Display',serif;font-size:13px;border-bottom:2px solid #1a1a2e;padding-bottom:3px;margin:16px 0 9px;color:#1a1a2e}
-.tpl-classic h3{font-size:13px;font-weight:700;color:#1a1a2e}
-.tpl-classic p,.tpl-classic li{color:#333}
-
-.tpl-bold h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;background:linear-gradient(90deg,#e8c547,#e05252);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
-.tpl-bold h2{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:#e8c547;font-weight:700;margin:16px 0 9px}
-.tpl-bold h3{font-size:13px;font-weight:700;color:#eee}
-.tpl-bold p,.tpl-bold li{color:#bbb}
-
-.tpl-corporate h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#003366;margin-bottom:2px}
-.tpl-corporate h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;background:#003366;color:white;padding:3px 9px;margin:16px 0 9px;display:inline-block;border-radius:2px}
-.tpl-corporate h3{font-size:13px;font-weight:700;color:#003366}
-.tpl-corporate p,.tpl-corporate li{color:#333}
-
-.tpl-creative h1{font-family:'Playfair Display',serif;font-style:italic;font-size:28px;color:#2d1b4e;margin-bottom:3px}
-.tpl-creative h2{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:#7c3aed;border-left:3px solid #7c3aed;padding-left:8px;margin:16px 0 9px}
-.tpl-creative h3{font-size:13px;font-weight:700;color:#2d1b4e}
-.tpl-creative p,.tpl-creative li{color:#444}
-
-.tpl-tech h1{font-family:'JetBrains Mono',monospace;font-size:18px;color:#00d4aa;margin-bottom:2px}
-.tpl-tech h2{font-family:'JetBrains Mono',monospace;font-size:10px;color:#00d4aa;border-bottom:1px dashed rgba(0,212,170,.3);padding-bottom:4px;margin:16px 0 9px}
-.tpl-tech h3{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:#1a1a1a}
-.tpl-tech p,.tpl-tech li{color:#333}
-
-.cv-rendered{font-size:13px;line-height:1.7}
-.cv-rendered p{margin-bottom:6px}
-.cv-rendered ul{padding-left:16px;margin-bottom:8px}
-.cv-rendered li{margin-bottom:3px}
-.cv-rendered strong{font-weight:700}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
-
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.content{grid-template-columns:1fr}.form-panel,.output-panel{max-height:none}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GhostSaaS | Premium AI Agency OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ghost: { 900: '#0a0a0c', 800: '#141417', blue: '#3b82f6', purple: '#8b5cf6' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #ffffff; }
+        .glass-panel { background: rgba(20, 20, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .neon-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loader { border-top-color: #8b5cf6; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Özel Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0c; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+    </style>
 </head>
-<body>
-<div class="app">
+<body class="min-h-screen flex">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">✦</div>
-    <div class="logo-text">
-      <div class="name">ResumeForge AI</div>
-      <div class="sub">Global CV Builder</div>
-    </div>
-  </div>
-
-  <div class="s-section">
-    <div class="s-label">Tools</div>
-    <div class="nav-item active" onclick="switchTab('cv',this)"><span class="ico">📄</span> CV Builder</div>
-    <div class="nav-item" onclick="switchTab('ats',this)"><span class="ico">🎯</span> ATS Score</div>
-    <div class="nav-item" onclick="switchTab('cover',this)"><span class="ico">✉️</span> Cover Letter</div>
-    <div class="nav-item" onclick="switchTab('linkedin',this)"><span class="ico">💼</span> LinkedIn Optimizer</div>
-    <div class="nav-item" onclick="switchTab('revision',this)"><span class="ico">💬</span> AI Revision Chat</div>
-  </div>
-
-  <div class="s-section">
-    <div class="s-label">Template</div>
-    <div class="tpl-wrap">
-      <div class="tpl-grid">
-        <div class="tpl-card selected" onclick="selectTpl('minimal',this)">
-          <div class="tpl-preview" style="background:#fff">
-            <div class="tl" style="width:60%;background:#e8c547;height:4px"></div>
-            <div class="tl" style="width:40%;opacity:.25"></div>
-            <div style="height:4px"></div>
-            <div class="tl" style="opacity:.15"></div><div class="tl" style="opacity:.12"></div><div class="tl" style="width:70%;opacity:.12"></div>
-          </div>
-          <div class="tpl-name">Minimal</div>
-        </div>
-        <div class="tpl-card" onclick="selectTpl('classic',this)">
-          <div class="tpl-preview" style="background:#faf8f5">
-            <div class="tl" style="width:75%;background:#1a1a2e;opacity:.7;height:5px"></div>
-            <div class="tl" style="width:45%;opacity:.25;margin-top:1px"></div>
-            <div style="height:4px"></div>
-            <div class="tl" style="width:50%;background:#1a1a2e;opacity:.4;height:2px"></div>
-            <div class="tl" style="opacity:.12"></div><div class="tl" style="opacity:.12"></div>
-          </div>
-          <div class="tpl-name">Classic</div>
-        </div>
-        <div class="tpl-card" onclick="selectTpl('bold',this)">
-          <div class="tpl-preview" style="background:#0b0b0d">
-            <div class="tl" style="width:70%;background:linear-gradient(90deg,#e8c547,#e05252);height:4px;border-radius:2px"></div>
-            <div class="tl" style="width:35%;background:#e8c547;opacity:.4;margin-top:1px"></div>
-            <div style="height:4px"></div>
-            <div class="tl" style="background:#e8c547;opacity:.2"></div><div class="tl" style="opacity:.1"></div>
-          </div>
-          <div class="tpl-name">Bold</div>
-        </div>
-        <div class="tpl-card" onclick="selectTpl('corporate',this)">
-          <div class="tpl-preview" style="background:#fff">
-            <div class="tl" style="width:65%;background:#003366;opacity:.75;height:4px"></div>
-            <div class="tl" style="width:40%;opacity:.2;margin-top:1px"></div>
-            <div style="height:4px"></div>
-            <div style="height:7px;background:#003366;opacity:.5;border-radius:2px;width:45%"></div>
-            <div class="tl" style="opacity:.12;margin-top:2px"></div>
-          </div>
-          <div class="tpl-name">Corporate</div>
-        </div>
-        <div class="tpl-card" onclick="selectTpl('creative',this)">
-          <div class="tpl-preview" style="background:#faf5ff">
-            <div class="tl" style="width:60%;background:#7c3aed;opacity:.65;height:4px"></div>
-            <div class="tl" style="width:45%;opacity:.2;margin-top:1px"></div>
-            <div style="height:3px"></div>
-            <div style="width:2px;height:18px;background:#7c3aed;opacity:.45;border-radius:1px"></div>
-          </div>
-          <div class="tpl-name">Creative</div>
-        </div>
-        <div class="tpl-card" onclick="selectTpl('tech',this)">
-          <div class="tpl-preview" style="background:#0a1628">
-            <div class="tl" style="width:55%;background:#00d4aa;opacity:.75;height:3px"></div>
-            <div class="tl" style="width:30%;background:#00d4aa;opacity:.3;margin-top:1px"></div>
-            <div style="height:4px"></div>
-            <div class="tl" style="background:#00d4aa;opacity:.15"></div><div class="tl" style="opacity:.12"></div>
-          </div>
-          <div class="tpl-name">Tech</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="t">ResumeForge AI <span style="color:var(--muted);font-weight:500;font-size:13px">— Global Edition</span></div>
-      <div class="s">Fill in your details → AI writes → Download PDF</div>
-    </div>
-    <div class="topbar-right">
-      <!-- Language Selector -->
-      <div class="lang-select-wrap" id="langWrap">
-        <div class="lang-select-btn" onclick="toggleLangDropdown()">
-          <span id="langLabel">🇺🇸 English</span>
-          <span style="font-size:10px;color:var(--muted)">▼</span>
-        </div>
-        <div class="lang-dropdown" id="langDropdown"></div>
-      </div>
-      <button class="btn btn-ghost" onclick="downloadPDF()">⬇ PDF</button>
-      <button class="btn btn-gold" onclick="document.getElementById('gen-btn').click()">✦ Generate</button>
-    </div>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- FORM -->
-    <div class="form-panel">
-      <div class="panel-hd">Personal Information</div>
-
-      <div class="fg-row">
-        <div class="fg"><label>Full Name *</label><input id="f-name" placeholder="John Smith"></div>
-        <div class="fg"><label>Target Position *</label><input id="f-position" placeholder="Senior Developer"></div>
-      </div>
-
-      <div class="fg-row">
-        <div class="fg"><label>Email</label><input id="f-email" type="email" placeholder="john@email.com"></div>
-        <div class="fg"><label>Phone</label><input id="f-phone" placeholder="+1 555 000 0000"></div>
-      </div>
-
-      <!-- COUNTRY / STATE / CITY -->
-      <div class="fg-row3">
-        <div class="fg">
-          <label>Country *</label>
-          <select id="f-country" onchange="updateStates()">
-            <option value="">Select country…</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label id="state-label">State / Region</label>
-          <select id="f-state" onchange="updateCities()">
-            <option value="">Select state…</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>City</label>
-          <select id="f-city">
-            <option value="">Select city…</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="fg-row">
-        <div class="fg"><label>LinkedIn URL</label><input id="f-linkedin" placeholder="linkedin.com/in/john"></div>
-        <div class="fg"><label>Portfolio / GitHub</label><input id="f-portfolio" placeholder="github.com/john"></div>
-      </div>
-
-      <div class="divider"><span>Career</span></div>
-
-      <div class="fg-row">
-        <div class="fg">
-          <label>Industry / Sector</label>
-          <select id="f-sector">
-            <option value="Technology / Software">Technology / Software</option>
-            <option value="Fintech / Banking">Fintech / Banking</option>
-            <option value="E-Commerce / Retail">E-Commerce / Retail</option>
-            <option value="SaaS / B2B">SaaS / B2B</option>
-            <option value="AI / Machine Learning">AI / Machine Learning</option>
-            <option value="Healthcare Technology">Healthcare Technology</option>
-            <option value="Education / EdTech">Education / EdTech</option>
-            <option value="Design / Creative">Design / Creative</option>
-            <option value="Marketing / Growth">Marketing / Growth</option>
-            <option value="Consulting">Consulting</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Legal">Legal</option>
-            <option value="Real Estate">Real Estate</option>
-            <option value="Media / Entertainment">Media / Entertainment</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Experience Level</label>
-          <select id="f-level">
-            <option value="Junior (0-2 years)">Junior (0-2 years)</option>
-            <option value="Mid-level (2-5 years)" selected>Mid-level (2-5 years)</option>
-            <option value="Senior (5-8 years)">Senior (5-8 years)</option>
-            <option value="Lead / Principal (8+ years)">Lead / Principal (8+ years)</option>
-            <option value="Director / VP">Director / VP</option>
-            <option value="C-Level / Executive">C-Level / Executive</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="fg"><label>Current / Last Job</label><input id="f-current-job" placeholder="Google — Senior Backend Engineer"></div>
-
-      <div class="fg">
-        <label>Work Experience <span style="color:var(--muted);font-weight:400;font-size:10px">(write freely, AI will format)</span></label>
-        <textarea id="f-experience" placeholder="e.g. 2021-2024 worked at Google as backend engineer. Built payment infrastructure. Led team of 6 engineers.&#10;2019-2021 startup as full-stack dev…"></textarea>
-      </div>
-
-      <div class="fg"><label>Education</label><input id="f-education" placeholder="MIT — Computer Science, B.S. 2019"></div>
-
-      <div class="divider"><span>Skills & Achievements</span></div>
-
-      <div class="fg"><label>Technical Skills</label><input id="f-skills" placeholder="React, TypeScript, Node.js, PostgreSQL, Docker, AWS, Kubernetes"></div>
-
-      <div class="fg"><label>Languages <span style="color:var(--muted);font-weight:400;font-size:10px">(spoken)</span></label><input id="f-languages" placeholder="English (native), Spanish (B2), French (A2)"></div>
-
-      <div class="fg">
-        <label>Key Achievements & Projects</label>
-        <textarea id="f-achievements" placeholder="e.g. Reduced checkout latency by 40% → $2M extra annual revenue. Built SaaS product from 0 to 15k users. Open source project with 2k GitHub stars."></textarea>
-      </div>
-
-      <div class="fg"><label>Target Company / Notes <span style="color:var(--muted);font-weight:400;font-size:10px">(optional)</span></label>
-        <input id="f-target" placeholder="FAANG-level company, remote-first, Series B startup"></div>
-
-      <button class="gen-btn" id="gen-btn" onclick="generateAll()">
-        <div class="bt">✦ &nbsp; Generate Everything</div>
-        <div class="sp"></div>
-      </button>
-    </div>
-
-    <!-- OUTPUT -->
-    <div class="output-panel">
-      <div class="tabs">
-        <div class="tab active" id="tab-cv" onclick="showTab('cv')">📄 CV</div>
-        <div class="tab" id="tab-ats" onclick="showTab('ats')">🎯 ATS</div>
-        <div class="tab" id="tab-cover" onclick="showTab('cover')">✉️ Cover Letter</div>
-        <div class="tab" id="tab-linkedin" onclick="showTab('linkedin')">💼 LinkedIn</div>
-        <div class="tab" id="tab-revision" onclick="showTab('revision')">💬 Revision</div>
-      </div>
-
-      <div class="tab-content">
-        <!-- CV -->
-        <div class="tab-panel active" id="panel-cv">
-          <div id="cv-empty" class="empty"><div class="ei">📄</div><div class="et">CV not generated yet</div><div class="ed">Fill the form and click Generate to create your professional CV.</div></div>
-          <div id="cv-result" style="display:none"><div class="prog-bar"><div class="prog-fill" id="cv-prog"></div></div><div class="cv-box" id="cv-content"></div></div>
-        </div>
-        <!-- ATS -->
-        <div class="tab-panel" id="panel-ats">
-          <div id="ats-empty" class="empty"><div class="ei">🎯</div><div class="et">ATS analysis pending</div><div class="ed">Generate your CV first to see the ATS compatibility score.</div></div>
-          <div id="ats-result" style="display:none">
-            <div class="ats-ring-wrap">
-              <div class="ring-rel">
-                <svg width="130" height="130" viewBox="0 0 130 130">
-                  <circle class="ring-bg" cx="65" cy="65" r="53"/>
-                  <circle class="ring-fill" id="ats-ring" cx="65" cy="65" r="53" stroke-dasharray="332.9" stroke-dashoffset="332.9" stroke="var(--gold)"/>
-                </svg>
-                <div class="ring-num"><div class="rn" id="ats-num" style="color:var(--gold)">0</div><div class="rl">ATS Score</div></div>
-              </div>
-              <div id="ats-verdict" style="font-size:13px;font-weight:700;color:var(--gold)">Calculating…</div>
+    <aside class="w-64 glass-panel border-r hidden md:flex flex-col p-6">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.5)]">G</div>
+            <div>
+                <h1 class="font-bold tracking-wider text-sm">GhostSaaS</h1>
+                <p class="text-xs text-gray-400">AI Engine OS</p>
             </div>
-            <div class="ats-checks" id="ats-checks"></div>
-          </div>
         </div>
-        <!-- COVER -->
-        <div class="tab-panel" id="panel-cover">
-          <div id="cover-empty" class="empty"><div class="ei">✉️</div><div class="et">Cover letter pending</div><div class="ed">Generated alongside your CV automatically.</div></div>
-          <div id="cover-result" style="display:none"><div class="prog-bar"><div class="prog-fill" id="cover-prog"></div></div><div class="cover-box" id="cover-content"></div></div>
+        
+        <nav class="space-y-2 flex-1">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-lg text-blue-400 border border-blue-500/30">
+                <span class="text-lg">📄</span> CV Oluşturucu
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-lg text-gray-400 transition">
+                <span class="text-lg">✉️</span> Kapak Mektubu (Cover)
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-lg text-gray-400 transition">
+                <span class="text-lg">🔗</span> LinkedIn Optimize
+            </a>
+        </nav>
+        
+        <div class="pt-4 border-t border-white/10 text-xs text-gray-500 text-center">
+            GhostSaaS v1.0.0 <br> Premium License Active
         </div>
-        <!-- LINKEDIN -->
-        <div class="tab-panel" id="panel-linkedin">
-          <div id="li-empty" class="empty"><div class="ei">💼</div><div class="et">LinkedIn optimizer pending</div><div class="ed">Profile optimization suggestions appear after generation.</div></div>
-          <div id="li-result" style="display:none">
-            <div class="li-section"><div class="li-title">📌 LinkedIn Headline</div><div class="li-box" id="li-headline"></div></div>
-            <div class="li-section"><div class="li-title">📝 About Section</div><div class="li-box" id="li-about"></div></div>
-            <div class="li-section"><div class="li-title">🔑 Keywords (green = present, red = add)</div><div class="chips" id="li-kw"></div></div>
-            <div class="li-section"><div class="li-title">✅ Profile Improvement Tips</div><div class="li-box" id="li-tips"></div></div>
-          </div>
-        </div>
-        <!-- REVISION -->
-        <div class="tab-panel" id="panel-revision">
-          <div class="chat-wrap">
-            <div class="msgs" id="chat-msgs">
-              <div class="msg ai"><div class="av">✦</div><div class="bubble">Hello! After generating your CV, you can request revisions here. Try: "Make the summary more concise", "Add more metrics to achievements", "Make it more formal", "Translate to Spanish"</div></div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <header class="glass-panel border-b px-8 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold neon-text">İçerik Stüdyosu</h2>
+                <p class="text-xs text-gray-400">Yapay zeka ile saniyeler içinde global formatta içerik üretin.</p>
             </div>
-            <div class="chat-input-row">
-              <input class="chat-in" id="chat-in" placeholder="e.g. Make summary shorter, add more metrics…" onkeypress="if(event.key==='Enter')sendRevision()">
-              <button class="send-btn" onclick="sendRevision()">Send →</button>
+            <div class="flex gap-4">
+                <select id="langSelect" class="bg-ghost-800 border border-gray-700 text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option value="English">🇬🇧 English</option>
+                    <option value="Türkçe">🇹🇷 Türkçe</option>
+                    <option value="German">🇩🇪 Deutsch</option>
+                    <option value="Spanish">🇪🇸 Español</option>
+                </select>
             </div>
-          </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="glass-panel rounded-2xl p-6 space-y-5 h-fit">
+                <h3 class="text-lg font-semibold border-b border-gray-700 pb-3">Profil Bilgileri</h3>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Ad Soyad</label>
+                        <input type="text" id="inputName" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Hedef Pozisyon</label>
+                        <input type="text" id="inputPosition" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition" placeholder="Senior Developer">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Sektör</label>
+                        <input type="text" id="inputSector" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition" placeholder="Teknoloji">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Hedef Ülke</label>
+                        <input type="text" id="inputCountry" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition" placeholder="USA, Germany vb.">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Yetenekler (Virgülle Ayırın)</label>
+                    <input type="text" id="inputSkills" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition" placeholder="Next.js, Python, Leadership">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Geçmiş Deneyimler & Başarılar</label>
+                    <textarea id="inputExp" rows="4" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 outline-none transition resize-none" placeholder="Geçmiş şirketlerinizi ve neler başardığınızı kısaca yazın. AI geri kalanını profesyonelce tamamlayacaktır."></textarea>
+                </div>
+
+                <button id="generateBtn" onclick="generateContent()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-[0_0_20px_rgba(139,92,246,0.3)] flex justify-center items-center gap-2">
+                    <span id="btnText">Yapay Zeka ile Üret 🚀</span>
+                    <div id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-solid rounded-full loader"></div>
+                </button>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 flex flex-col">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-lg font-semibold">AI Çıktısı</h3>
+                    <button onclick="downloadPDF()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md transition flex items-center gap-2">
+                        📥 PDF İndir
+                    </button>
+                </div>
+                
+                <div id="outputArea" class="flex-1 bg-black/30 rounded-lg p-5 overflow-y-auto font-mono text-sm text-gray-300 leading-relaxed whitespace-pre-wrap border border-gray-800">
+                    Sisteme bilgilerinizi girin ve "Üret" butonuna basın. GhostSaaS yapay zeka motoru, girdiğiniz bilgilere göre Global ATS (Aday Takip Sistemi) uyumlu profesyonel içeriği burada oluşturacaktır...
+                </div>
+            </div>
+
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
+    </main>
 
-<script>
-// ══════════════════════════════════════════
-// LANGUAGE DATA — 20 Languages
-// ══════════════════════════════════════════
-const LANGUAGES = [
-  {code:'en',label:'🇺🇸 English',name:'English'},
-  {code:'tr',label:'🇹🇷 Türkçe',name:'Turkish'},
-  {code:'es',label:'🇪🇸 Español',name:'Spanish'},
-  {code:'fr',label:'🇫🇷 Français',name:'French'},
-  {code:'de',label:'🇩🇪 Deutsch',name:'German'},
-  {code:'it',label:'🇮🇹 Italiano',name:'Italian'},
-  {code:'pt',label:'🇧🇷 Português',name:'Portuguese'},
-  {code:'ru',label:'🇷🇺 Русский',name:'Russian'},
-  {code:'ar',label:'🇸🇦 العربية',name:'Arabic'},
-  {code:'zh',label:'🇨🇳 中文',name:'Chinese (Simplified)'},
-  {code:'ja',label:'🇯🇵 日本語',name:'Japanese'},
-  {code:'ko',label:'🇰🇷 한국어',name:'Korean'},
-  {code:'hi',label:'🇮🇳 हिन्दी',name:'Hindi'},
-  {code:'nl',label:'🇳🇱 Nederlands',name:'Dutch'},
-  {code:'pl',label:'🇵🇱 Polski',name:'Polish'},
-  {code:'sv',label:'🇸🇪 Svenska',name:'Swedish'},
-  {code:'id',label:'🇮🇩 Bahasa Indonesia',name:'Indonesian'},
-  {code:'vi',label:'🇻🇳 Tiếng Việt',name:'Vietnamese'},
-  {code:'th',label:'🇹🇭 ภาษาไทย',name:'Thai'},
-  {code:'uk',label:'🇺🇦 Українська',name:'Ukrainian'},
-  {code:'ro',label:'🇷🇴 Română',name:'Romanian'},
-  {code:'cs',label:'🇨🇿 Čeština',name:'Czech'},
-];
+    <script>
+        async function generateContent() {
+            const btn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const outputArea = document.getElementById('outputArea');
 
-let selectedLang = LANGUAGES[0];
+            // Form verilerini al
+            const data = {
+                name: document.getElementById('inputName').value || 'Müşteri',
+                position: document.getElementById('inputPosition').value || 'Profesyonel',
+                sector: document.getElementById('inputSector').value || 'Genel',
+                country: document.getElementById('inputCountry').value || 'Global',
+                skills: document.getElementById('inputSkills').value || '',
+                achievements: document.getElementById('inputExp').value || '',
+                lang: document.getElementById('langSelect').value
+            };
 
-// ══════════════════════════════════════════
-// COUNTRY / STATE / CITY DATA
-// ══════════════════════════════════════════
-const GEO = {
-  "United States": {
-    label:"🇺🇸 United States",
-    stateLabel:"State",
-    states:{
-      "California":["Los Angeles","San Francisco","San Diego","San Jose","Sacramento"],
-      "New York":["New York City","Buffalo","Rochester","Yonkers","Albany"],
-      "Texas":["Houston","Austin","Dallas","San Antonio","Fort Worth"],
-      "Florida":["Miami","Orlando","Tampa","Jacksonville","Fort Lauderdale"],
-      "Washington":["Seattle","Spokane","Tacoma","Bellevue","Olympia"],
-      "Illinois":["Chicago","Aurora","Naperville","Rockford","Springfield"],
-      "Massachusetts":["Boston","Cambridge","Worcester","Springfield","Lowell"],
-      "Georgia":["Atlanta","Augusta","Columbus","Savannah","Macon"],
-      "Colorado":["Denver","Colorado Springs","Aurora","Fort Collins","Boulder"],
-      "Nevada":["Las Vegas","Henderson","Reno","North Las Vegas","Sparks"]
-    }
-  },
-  "Turkey": {
-    label:"🇹🇷 Turkey",
-    stateLabel:"Province",
-    states:{
-      "İstanbul":["Kadıköy","Beşiktaş","Şişli","Üsküdar","Bakırköy","Fatih","Beyoğlu","Sarıyer"],
-      "Ankara":["Çankaya","Keçiören","Mamak","Altındağ","Yenimahalle"],
-      "İzmir":["Konak","Karşıyaka","Bornova","Buca","Çiğli","Bayraklı"],
-      "Bursa":["Osmangazi","Nilüfer","Yıldırım","Gemlik","İnegöl"],
-      "Antalya":["Muratpaşa","Konyaaltı","Kepez","Alanya","Manavgat"],
-      "Adana":["Seyhan","Çukurova","Yüreğir","Sarıçam"],
-      "Gaziantep":["Şahinbey","Şehitkamil"],
-      "Konya":["Selçuklu","Meram","Karatay"],
-      "Mersin":["Yenişehir","Mezitli","Toroslar","Akdeniz"],
-      "Kayseri":["Melikgazi","Kocasinan","Talas"]
-    }
-  },
-  "United Kingdom": {
-    label:"🇬🇧 United Kingdom",
-    stateLabel:"Region",
-    states:{
-      "England":["London","Manchester","Birmingham","Leeds","Sheffield","Liverpool","Bristol","Newcastle","Nottingham","Leicester"],
-      "Scotland":["Edinburgh","Glasgow","Aberdeen","Dundee","Inverness"],
-      "Wales":["Cardiff","Swansea","Newport","Bangor","Wrexham"],
-      "Northern Ireland":["Belfast","Derry","Lisburn","Newry","Armagh"]
-    }
-  },
-  "Germany": {
-    label:"🇩🇪 Germany",
-    stateLabel:"State",
-    states:{
-      "Bavaria":["Munich","Nuremberg","Augsburg","Regensburg","Würzburg"],
-      "North Rhine-Westphalia":["Cologne","Düsseldorf","Dortmund","Essen","Duisburg"],
-      "Berlin":["Mitte","Charlottenburg","Prenzlauer Berg","Friedrichshain","Kreuzberg"],
-      "Hamburg":["Hamburg City","Altona","Eimsbüttel","Wandsbek","Harburg"],
-      "Baden-Württemberg":["Stuttgart","Karlsruhe","Freiburg","Heidelberg","Mannheim"],
-      "Saxony":["Dresden","Leipzig","Chemnitz","Zwickau"],
-      "Hesse":["Frankfurt","Wiesbaden","Kassel","Darmstadt"]
-    }
-  },
-  "France": {
-    label:"🇫🇷 France",
-    stateLabel:"Region",
-    states:{
-      "Île-de-France":["Paris","Versailles","Boulogne-Billancourt","Saint-Denis","Montreuil"],
-      "Auvergne-Rhône-Alpes":["Lyon","Grenoble","Clermont-Ferrand","Saint-Étienne"],
-      "Provence-Alpes-Côte d'Azur":["Marseille","Nice","Toulon","Aix-en-Provence"],
-      "Nouvelle-Aquitaine":["Bordeaux","Limoges","Poitiers","Bayonne"],
-      "Occitanie":["Toulouse","Montpellier","Nîmes","Perpignan"],
-      "Hauts-de-France":["Lille","Amiens","Roubaix","Tourcoing"]
-    }
-  },
-  "India": {
-    label:"🇮🇳 India",
-    stateLabel:"State",
-    states:{
-      "Maharashtra":["Mumbai","Pune","Nagpur","Nashik","Aurangabad"],
-      "Karnataka":["Bangalore","Mysore","Hubli","Mangalore","Belgaum"],
-      "Delhi":["New Delhi","Dwarka","Rohini","Saket","Lajpat Nagar"],
-      "Tamil Nadu":["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem"],
-      "Telangana":["Hyderabad","Warangal","Nizamabad","Karimnagar"],
-      "Gujarat":["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar"],
-      "West Bengal":["Kolkata","Howrah","Durgapur","Asansol","Siliguri"],
-      "Uttar Pradesh":["Lucknow","Kanpur","Varanasi","Agra","Meerut"]
-    }
-  },
-  "Canada": {
-    label:"🇨🇦 Canada",
-    stateLabel:"Province",
-    states:{
-      "Ontario":["Toronto","Ottawa","Mississauga","Brampton","Hamilton"],
-      "British Columbia":["Vancouver","Victoria","Surrey","Burnaby","Richmond"],
-      "Quebec":["Montreal","Quebec City","Laval","Gatineau","Sherbrooke"],
-      "Alberta":["Calgary","Edmonton","Red Deer","Lethbridge","Medicine Hat"],
-      "Manitoba":["Winnipeg","Brandon","Steinbach","Thompson"],
-      "Nova Scotia":["Halifax","Dartmouth","Sydney","Truro"]
-    }
-  },
-  "Australia": {
-    label:"🇦🇺 Australia",
-    stateLabel:"State",
-    states:{
-      "New South Wales":["Sydney","Newcastle","Wollongong","Canberra","Central Coast"],
-      "Victoria":["Melbourne","Geelong","Ballarat","Bendigo","Shepparton"],
-      "Queensland":["Brisbane","Gold Coast","Sunshine Coast","Townsville","Cairns"],
-      "Western Australia":["Perth","Fremantle","Bunbury","Mandurah","Geraldton"],
-      "South Australia":["Adelaide","Mount Gambier","Whyalla","Victor Harbor"]
-    }
-  },
-  "Netherlands": {
-    label:"🇳🇱 Netherlands",
-    stateLabel:"Province",
-    states:{
-      "North Holland":["Amsterdam","Haarlem","Alkmaar","Zaandam"],
-      "South Holland":["Rotterdam","The Hague","Leiden","Dordrecht","Delft"],
-      "Utrecht":["Utrecht","Amersfoort","Zeist","Nieuwegein"],
-      "North Brabant":["Eindhoven","Tilburg","Breda","Hertogenbosch"],
-      "Gelderland":["Arnhem","Nijmegen","Apeldoorn","Ede"]
-    }
-  },
-  "Spain": {
-    label:"🇪🇸 Spain",
-    stateLabel:"Region",
-    states:{
-      "Community of Madrid":["Madrid","Alcalá de Henares","Leganés","Getafe","Alcorcón"],
-      "Catalonia":["Barcelona","Badalona","Terrassa","Hospitalet","Sabadell"],
-      "Andalusia":["Seville","Málaga","Córdoba","Granada","Almería"],
-      "Valencia":["Valencia","Alicante","Elche","Castellón"],
-      "Basque Country":["Bilbao","San Sebastián","Vitoria-Gasteiz"]
-    }
-  },
-  "Brazil": {
-    label:"🇧🇷 Brazil",
-    stateLabel:"State",
-    states:{
-      "São Paulo":["São Paulo","Campinas","Santos","Ribeirão Preto","São Bernardo do Campo"],
-      "Rio de Janeiro":["Rio de Janeiro","Niterói","Nova Iguaçu","Duque de Caxias"],
-      "Minas Gerais":["Belo Horizonte","Uberlândia","Contagem","Juiz de Fora"],
-      "Rio Grande do Sul":["Porto Alegre","Caxias do Sul","Pelotas","Canoas"],
-      "Paraná":["Curitiba","Londrina","Maringá","Ponta Grossa"],
-      "Bahia":["Salvador","Feira de Santana","Vitória da Conquista"]
-    }
-  },
-  "Japan": {
-    label:"🇯🇵 Japan",
-    stateLabel:"Prefecture",
-    states:{
-      "Tokyo":["Shinjuku","Shibuya","Minato","Chiyoda","Shinagawa","Setagaya"],
-      "Osaka":["Osaka City","Sakai","Higashiosaka","Toyonaka"],
-      "Kanagawa":["Yokohama","Kawasaki","Sagamihara","Fujisawa"],
-      "Aichi":["Nagoya","Toyota","Okazaki","Ichinomiya"],
-      "Fukuoka":["Fukuoka City","Kitakyushu","Kurume","Omuta"],
-      "Hokkaido":["Sapporo","Asahikawa","Hakodate","Kushiro"]
-    }
-  },
-  "China": {
-    label:"🇨🇳 China",
-    stateLabel:"Province",
-    states:{
-      "Beijing":["Chaoyang","Haidian","Dongcheng","Xicheng","Fengtai"],
-      "Shanghai":["Huangpu","Jing'an","Pudong","Minhang","Baoshan"],
-      "Guangdong":["Guangzhou","Shenzhen","Dongguan","Foshan","Zhongshan"],
-      "Zhejiang":["Hangzhou","Ningbo","Wenzhou","Shaoxing"],
-      "Sichuan":["Chengdu","Mianyang","Deyang","Suining"],
-      "Jiangsu":["Nanjing","Suzhou","Wuxi","Changzhou"]
-    }
-  },
-  "South Korea": {
-    label:"🇰🇷 South Korea",
-    stateLabel:"Province",
-    states:{
-      "Seoul":["Gangnam","Mapo","Jongno","Yongsan","Songpa","Nowon"],
-      "Gyeonggi":["Suwon","Seongnam","Goyang","Bucheon","Anyang"],
-      "Busan":["Haeundae","Seo-gu","Jung-gu","Dong-gu"],
-      "Incheon":["Namdong","Bupyeong","Michuhol","Seo-gu"],
-      "Daegu":["Jung-gu","Dalseo","Suseong","Buk-gu"]
-    }
-  },
-  "Russia": {
-    label:"🇷🇺 Russia",
-    stateLabel:"Region",
-    states:{
-      "Moscow":["Central","Arbat","Hamovniki","Tverskoy","Zamoskvorechye"],
-      "Saint Petersburg":["Admiralteysky","Vasileostrovsky","Petrogradsky","Nevsky"],
-      "Novosibirsk Oblast":["Novosibirsk","Berdsk","Iskitim"],
-      "Sverdlovsk Oblast":["Yekaterinburg","Nizhny Tagil","Kamensk-Uralsky"],
-      "Tatarstan":["Kazan","Naberezhnye Chelny","Nizhnekamsk"]
-    }
-  },
-  "UAE": {
-    label:"🇦🇪 UAE",
-    stateLabel:"Emirate",
-    states:{
-      "Dubai":["Downtown Dubai","Dubai Marina","Business Bay","JBR","DIFC","Dubai Hills"],
-      "Abu Dhabi":["Al Khalidiyah","Al Reem Island","Al Mushrif","Yas Island"],
-      "Sharjah":["Al Nahda","Al Khan","Al Majaz","Rolla"],
-      "Ajman":["Ajman City"],
-      "Ras Al Khaimah":["RAK City","Al Hamra"]
-    }
-  },
-  "Saudi Arabia": {
-    label:"🇸🇦 Saudi Arabia",
-    stateLabel:"Region",
-    states:{
-      "Riyadh Region":["Riyadh","Al Kharj","Al Majmaah","Dawadmi"],
-      "Mecca Region":["Jeddah","Mecca","Taif","Al Qunfudhah"],
-      "Medina Region":["Medina","Yanbu","Al Ula"],
-      "Eastern Province":["Dammam","Al Khobar","Dhahran","Jubail"]
-    }
-  },
-  "Singapore": {
-    label:"🇸🇬 Singapore",
-    stateLabel:"Region",
-    states:{
-      "Central Region":["Orchard","Marina Bay","Tanjong Pagar","Chinatown","Little India"],
-      "East Region":["Tampines","Pasir Ris","Bedok","Changi"],
-      "West Region":["Jurong","Clementi","Buona Vista","Queenstown"],
-      "North Region":["Woodlands","Sembawang","Yishun","Admiralty"],
-      "North-East Region":["Sengkang","Punggol","Hougang","Serangoon"]
-    }
-  },
-  "Italy": {
-    label:"🇮🇹 Italy",
-    stateLabel:"Region",
-    states:{
-      "Lombardy":["Milan","Bergamo","Brescia","Como","Monza"],
-      "Lazio":["Rome","Frosinone","Latina","Rieti","Viterbo"],
-      "Campania":["Naples","Salerno","Caserta","Benevento","Avellino"],
-      "Veneto":["Venice","Verona","Padua","Vicenza","Treviso"],
-      "Tuscany":["Florence","Pisa","Siena","Livorno","Arezzo"],
-      "Piedmont":["Turin","Novara","Alessandria","Asti"]
-    }
-  },
-  "Mexico": {
-    label:"🇲🇽 Mexico",
-    stateLabel:"State",
-    states:{
-      "Mexico City":["Cuauhtémoc","Benito Juárez","Coyoacán","Miguel Hidalgo","Tlalpan"],
-      "Jalisco":["Guadalajara","Zapopan","Tlaquepaque","Tonalá","Puerto Vallarta"],
-      "Nuevo León":["Monterrey","San Nicolás de los Garza","Guadalupe","Apodaca","Santa Catarina"],
-      "State of Mexico":["Toluca","Ecatepec","Naucalpan","Tlalnepantla","Nezahualcóyotl"],
-      "Puebla":["Puebla City","Tehuacán","San Martín Texmelucan"],
-      "Yucatán":["Mérida","Valladolid","Tizimín"]
-    }
-  },
-  "Poland": {
-    label:"🇵🇱 Poland",
-    stateLabel:"Voivodeship",
-    states:{
-      "Masovian":["Warsaw","Radom","Płock"],
-      "Lesser Poland":["Kraków","Tarnów","Nowy Sącz"],
-      "Silesian":["Katowice","Gliwice","Bytom","Zabrze"],
-      "Greater Poland":["Poznań","Kalisz","Konin"],
-      "Łódź":["Łódź","Piotrków Trybunalski","Pabianice"]
-    }
-  },
-  "Sweden": {
-    label:"🇸🇪 Sweden",
-    stateLabel:"County",
-    states:{
-      "Stockholm County":["Stockholm","Solna","Huddinge","Nacka"],
-      "Västra Götaland":["Gothenburg","Borås","Mölndal","Trollhättan"],
-      "Skåne":["Malmö","Helsingborg","Lund","Kristianstad"],
-      "Uppsala":["Uppsala","Enköping","Tierp"]
-    }
-  }
-};
+            // UI Yükleniyor Durumu
+            btn.disabled = true;
+            btnText.innerText = "Yapay Zeka Analiz Ediyor...";
+            btnLoader.classList.remove('hidden');
+            outputArea.innerText = "GhostSaaS AI Motoru çalışıyor. Lütfen bekleyin...\n\n(Backend ile iletişim kuruluyor: /api/generate)";
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-(function init(){
-  // Build language dropdown
-  const dd = document.getElementById('langDropdown');
-  LANGUAGES.forEach(l => {
-    const el = document.createElement('div');
-    el.className = 'lang-option' + (l.code==='en'?' selected':'');
-    el.innerHTML = `<span class="lang-flag">${l.label.split(' ')[0]}</span><span>${l.name}</span>`;
-    el.onclick = () => { selectedLang=l; document.getElementById('langLabel').textContent=l.label; dd.classList.remove('open'); document.querySelectorAll('.lang-option').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-    dd.appendChild(el);
-  });
+            try {
+                // Senin backend API'ne güvenli POST isteği atıyoruz
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'cv', data: data })
+                });
 
-  // Build country dropdown
-  const cs = document.getElementById('f-country');
-  Object.keys(GEO).sort().forEach(c => {
-    const o = document.createElement('option');
-    o.value=c; o.textContent=GEO[c].label;
-    cs.appendChild(o);
-  });
+                const result = await response.json();
 
-  // Close lang dropdown on outside click
-  document.addEventListener('click', e => { if(!document.getElementById('langWrap').contains(e.target)) document.getElementById('langDropdown').classList.remove('open'); });
-})();
+                if (response.ok && result.text) {
+                    outputArea.innerText = result.text;
+                } else {
+                    outputArea.innerText = "Hata oluştu: " + (result.error || "Sunucu yanıt vermedi.");
+                }
+            } catch (error) {
+                console.error(error);
+                outputArea.innerText = "Bağlantı hatası! Vercel'e yüklediğinizden veya yerel sunucunuzun açık olduğundan emin olun.";
+            } finally {
+                // UI Normale Dön
+                btn.disabled = false;
+                btnText.innerText = "Yapay Zeka ile Üret 🚀";
+                btnLoader.classList.add('hidden');
+            }
+        }
 
-function toggleLangDropdown(){ document.getElementById('langDropdown').classList.toggle('open'); }
+        // PDF İndirme Fonksiyonu (jsPDF Entegrasyonu)
+        function downloadPDF() {
+            const text = document.getElementById('outputArea').innerText;
+            if(!text || text.includes("GhostSaaS AI Motoru")) {
+                alert("Lütfen önce bir CV oluşturun!");
+                return;
+            }
 
-function updateStates(){
-  const country = document.getElementById('f-country').value;
-  const stateSel = document.getElementById('f-state');
-  const citySel = document.getElementById('f-city');
-  const stateLabel = document.getElementById('state-label');
-  stateSel.innerHTML='<option value="">Select…</option>';
-  citySel.innerHTML='<option value="">Select…</option>';
-  if(!country||!GEO[country]) return;
-  stateLabel.textContent = GEO[country].stateLabel || 'State / Region';
-  Object.keys(GEO[country].states).forEach(s => {
-    const o=document.createElement('option'); o.value=s; o.textContent=s; stateSel.appendChild(o);
-  });
-}
-
-function updateCities(){
-  const country = document.getElementById('f-country').value;
-  const state = document.getElementById('f-state').value;
-  const citySel = document.getElementById('f-city');
-  citySel.innerHTML='<option value="">Select…</option>';
-  if(!country||!state||!GEO[country]||!GEO[country].states[state]) return;
-  GEO[country].states[state].forEach(c => {
-    const o=document.createElement('option'); o.value=c; o.textContent=c; citySel.appendChild(o);
-  });
-}
-
-// ══════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════
-let currentTpl='minimal', generatedCV='', chatHistory=[];
-
-function showTab(t){
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
-  document.getElementById('tab-'+t).classList.add('active');
-  document.getElementById('panel-'+t).classList.add('active');
-}
-
-function switchTab(t,el){
-  showTab(t);
-  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function selectTpl(name,el){
-  document.querySelectorAll('.tpl-card').forEach(x=>x.classList.remove('selected'));
-  el.classList.add('selected');
-  currentTpl=name;
-  if(generatedCV) renderCV(generatedCV);
-}
-
-// ══════════════════════════════════════════
-// GENERATE ALL
-// ══════════════════════════════════════════
-async function generateAll(){
-  const name=document.getElementById('f-name').value.trim();
-  const position=document.getElementById('f-position').value.trim();
-  if(!name||!position){alert('Please fill in Full Name and Target Position.');return;}
-
-  const btn=document.getElementById('gen-btn');
-  btn.classList.add('loading'); btn.disabled=true;
-
-  const country=document.getElementById('f-country').value;
-  const state=document.getElementById('f-state').value;
-  const city=document.getElementById('f-city').value;
-  const location=[city,state,country].filter(Boolean).join(', ')||'Not specified';
-
-  const d={
-    name, position, location, country,
-    email:document.getElementById('f-email').value||name.toLowerCase().replace(' ','.')+'@email.com',
-    phone:document.getElementById('f-phone').value,
-    linkedin:document.getElementById('f-linkedin').value,
-    portfolio:document.getElementById('f-portfolio').value,
-    sector:document.getElementById('f-sector').value,
-    level:document.getElementById('f-level').value,
-    currentJob:document.getElementById('f-current-job').value,
-    experience:document.getElementById('f-experience').value,
-    education:document.getElementById('f-education').value,
-    skills:document.getElementById('f-skills').value,
-    languages:document.getElementById('f-languages').value,
-    achievements:document.getElementById('f-achievements').value,
-    target:document.getElementById('f-target').value,
-    lang:selectedLang.name,
-    langCode:selectedLang.code
-  };
-
-  await Promise.all([genCV(d), genCover(d), genLinkedIn(d)]);
-
-  btn.classList.remove('loading'); btn.disabled=false;
-  showTab('cv');
-}
-
-// ══════════════════════════════════════════
-// CV GENERATOR
-// ══════════════════════════════════════════
-async function genCV(d){
-  document.getElementById('cv-empty').style.display='none';
-  document.getElementById('cv-result').style.display='block';
-  const prog=document.getElementById('cv-prog');
-  const box=document.getElementById('cv-content');
-  box.innerHTML='<div style="color:var(--muted);font-size:13px;padding:16px 0">✦ Writing your CV…</div>';
-  prog.style.width='25%';
-
-  const prompt=`You are the world's best career consultant and ATS optimization expert.
-
-Write a professional, ATS-optimized CV in ${d.lang} language for the following person.
-
-PERSON DETAILS:
-Name: ${d.name}
-Target Position: ${d.position}
-Location: ${d.location}
-Email: ${d.email}
-Phone: ${d.phone||''}
-LinkedIn: ${d.linkedin||'linkedin.com/in/'+d.name.toLowerCase().replace(' ','-')}
-Portfolio: ${d.portfolio||''}
-Industry: ${d.sector}
-Experience Level: ${d.level}
-Current/Last Job: ${d.currentJob||'Not specified'}
-Work Experience: ${d.experience||'Has relevant industry experience'}
-Education: ${d.education||'University graduate'}
-Technical Skills: ${d.skills||'Relevant technical skills'}
-Languages Spoken: ${d.languages||''}
-Key Achievements: ${d.achievements||'Has notable achievements'}
-Target: ${d.target||''}
-
-STRICT FORMATTING RULES:
-1. Write ONLY the CV content — no explanations, no preamble
-2. Use markdown: # for name, ## for SECTION TITLES (uppercase), ### for company/school
-3. ## CONTACT: email, location, phone, linkedin, portfolio
-4. ## PROFESSIONAL SUMMARY: 3-4 powerful sentences, keyword-rich, impact-focused
-5. ## EXPERIENCE: 3 realistic experiences. Each with company, dates, title, 3-4 bullet achievements (include numbers: %, $, users, time saved)
-6. ## EDUCATION: appropriate university and degree
-7. ## SKILLS: categorized (Technical / Tools / Soft Skills)
-8. ## LANGUAGES: spoken languages with proficiency
-9. Start bullet points with strong action verbs
-10. Use industry-specific keywords for ATS
-11. Keep professional and culturally appropriate for ${d.country||'the target market'}`;
-
-  try {
-    const res=await callAPI('cv', d);
-    generatedCV=res;
-    prog.style.width='100%';
-    renderCV(res);
-    chatHistory=[{role:'user',content:prompt},{role:'assistant',content:res}];
-    setTimeout(()=>computeATS(res,d),400);
-  } catch(e){
-    box.innerHTML='<div style="color:var(--red)">Error: '+e.message+'</div>';
-  }
-}
-
-function renderCV(text){
-  const bgs={minimal:'#fff',classic:'#faf8f5',bold:'#0c0c0e',corporate:'#fff',creative:'#faf5ff',tech:'#0a1628'};
-  const txtColors={minimal:'#222',classic:'#222',bold:'#ddd',corporate:'#222',creative:'#222',tech:'#ccc'};
-
-  let html=text
-    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
-    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>[\s\S]*?<\/li>\n?)+/g,m=>`<ul>${m}</ul>`)
-    .replace(/^(?!<[hul\/]).+$/gm,m=>m.trim()?`<p>${m}</p>`:'');
-
-  document.getElementById('cv-content').innerHTML=`
-    <div class="cv-rendered tpl-${currentTpl}" style="background:${bgs[currentTpl]};color:${txtColors[currentTpl]};padding:24px;border-radius:7px">${html}</div>`;
-}
-
-// ══════════════════════════════════════════
-// ATS SCORE
-// ══════════════════════════════════════════
-function computeATS(cv,d){
-  const txt=cv.toLowerCase();
-  let score=0;
-  const checks=[];
-
-  const has=(...words)=>words.some(w=>txt.includes(w.toLowerCase()));
-  const pct=(a,b)=>b>0?Math.round((a/b)*100):70;
-
-  // 1 Contact
-  const c1=has('@','linkedin','email');
-  checks.push({ico:c1?'✅':'❌',title:'Contact Information',desc:'Email, location, LinkedIn present',badge:c1?'bp':'bf',label:c1?'✓ Present':'✗ Missing'});
-  if(c1)score+=15;
-
-  // 2 Keywords
-  const kws=(d.skills||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-  const matched=kws.filter(k=>txt.includes(k)).length;
-  const kwp=pct(matched,kws.length||8);
-  const c2=kwp>=60;
-  checks.push({ico:c2?'✅':'⚠️',title:'Keyword Density',desc:`${matched}/${kws.length||'?'} skills found in CV`,badge:c2?'bp':'bw',label:kwp+'%'});
-  score+=Math.round(kwp*.22);
-
-  // 3 Length
-  const wc=cv.split(/\s+/).length;
-  const c3=wc>=280&&wc<=750;
-  checks.push({ico:c3?'✅':'⚠️',title:'Content Length',desc:`${wc} words (ideal: 300–700)`,badge:c3?'bp':'bw',label:c3?'Ideal':'Check'});
-  if(c3)score+=15;
-
-  // 4 Action verbs
-  const verbs=['developed','built','led','managed','increased','designed','created','delivered','implemented','optimized','reduced','launched','improved','coordinated','geliştir','yönet','artır','oluştur'];
-  const c4=verbs.some(v=>txt.includes(v));
-  checks.push({ico:c4?'✅':'⚠️',title:'Action Verbs',desc:'Strong power verbs used',badge:c4?'bp':'bw',label:c4?'Strong':'Weak'});
-  if(c4)score+=15;
-
-  // 5 Metrics
-  const c5=/\d+[\%$k+]|\d{2,}[\s]*(users?|customers?|projects?|million|thousand|revenue)/i.test(cv);
-  checks.push({ico:c5?'✅':'⚠️',title:'Metrics & Numbers',desc:'Quantified achievements',badge:c5?'bp':'bw',label:c5?'Present':'Add numbers'});
-  if(c5)score+=15;
-
-  // 6 Sections
-  const secs=['summary','experience','education','skills'].filter(s=>txt.includes(s));
-  const c6=secs.length>=3;
-  checks.push({ico:c6?'✅':'❌',title:'Section Structure',desc:'Standard CV sections detected',badge:c6?'bp':'bf',label:c6?secs.length+' sections':'Incomplete'});
-  if(c6)score+=15;
-
-  score=Math.min(97,Math.max(52,score));
-
-  document.getElementById('ats-empty').style.display='none';
-  document.getElementById('ats-result').style.display='block';
-
-  const color=score>=80?'var(--green)':score>=65?'var(--gold)':'var(--red)';
-  const ring=document.getElementById('ats-ring');
-  ring.style.stroke=color;
-  const circ=332.9;
-  setTimeout(()=>{ring.style.strokeDashoffset=circ-(score/100)*circ;},80);
-
-  let cur=0;
-  const iv=setInterval(()=>{
-    cur+=2; document.getElementById('ats-num').textContent=Math.min(cur,score);
-    document.getElementById('ats-num').style.color=color;
-    if(cur>=score)clearInterval(iv);
-  },18);
-
-  const v=score>=80?'🎉 Excellent — will pass ATS!':score>=65?'👍 Good — a few improvements recommended':'⚠️ Needs improvement';
-  document.getElementById('ats-verdict').textContent=v;
-  document.getElementById('ats-verdict').style.color=color;
-
-  document.getElementById('ats-checks').innerHTML=checks.map(c=>`
-    <div class="ats-chk">
-      <div class="chk-ico">${c.ico}</div>
-      <div class="chk-txt"><div class="chk-title">${c.title}</div><div class="chk-desc">${c.desc}</div></div>
-      <div class="chk-badge ${c.badge}">${c.label}</div>
-    </div>`).join('');
-}
-
-// ══════════════════════════════════════════
-// COVER LETTER
-// ══════════════════════════════════════════
-async function genCover(d){
-  document.getElementById('cover-empty').style.display='none';
-  document.getElementById('cover-result').style.display='block';
-  const prog=document.getElementById('cover-prog');
-  const box=document.getElementById('cover-content');
-  box.innerHTML='<div style="color:var(--muted);font-size:12px">✦ Writing cover letter…</div>';
-  prog.style.width='35%';
-
-  const prompt=`Write a professional, personalized cover letter in ${d.lang} for ${d.name} applying for ${d.position} in ${d.sector}.
-
-Location: ${d.location}
-Skills: ${d.skills}
-Achievements: ${d.achievements}
-Level: ${d.level}
-Target: ${d.target||'ideal company'}
-
-Rules:
-- 3 paragraphs: hook opening, why me (specific achievements with numbers), closing CTA
-- Professional yet warm tone
-- 200-250 words
-- Standard letter format (Dear Hiring Manager / [Company], ... Sincerely, ${d.name})
-- Culturally appropriate for ${d.country||'target market'}
-- ONLY the letter, no extra commentary`;
-
-  try {
-    const res=await callAPI('cover', d);
-    prog.style.width='100%';
-    box.innerHTML=res.replace(/\n/g,'<br>');
-  } catch(e){box.innerHTML='<div style="color:var(--red)">Error generating cover letter.</div>';}
-}
-
-// ══════════════════════════════════════════
-// LINKEDIN OPTIMIZER
-// ══════════════════════════════════════════
-async function genLinkedIn(d){
-  document.getElementById('li-empty').style.display='none';
-  document.getElementById('li-result').style.display='block';
-
-  const prompt=`Generate LinkedIn profile optimization in ${d.lang} for: ${d.name}, ${d.position}, ${d.sector}, ${d.level}.
-Skills: ${d.skills}. Achievements: ${d.achievements}.
-
-Return ONLY valid JSON (no markdown, no backticks):
-{"headline":"120-char LinkedIn headline","about":"LinkedIn About section (first line hooks, keyword-rich, 3 short paragraphs, 300 words)","keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8"],"missing_keywords":["add1","add2","add3","add4"],"tips":"5 numbered LinkedIn profile tips as plain text"}`;
-
-  try {
-    const res=await callAPI('linkedin', d);
-    const clean=res.replace(/```json|```/g,'').trim();
-    const j=JSON.parse(clean);
-    document.getElementById('li-headline').textContent=j.headline||'';
-    document.getElementById('li-about').textContent=j.about||'';
-    document.getElementById('li-tips').innerHTML=(j.tips||'').replace(/\n/g,'<br>');
-    const kw=document.getElementById('li-kw'); kw.innerHTML='';
-    (j.keywords||[]).forEach(k=>{const c=document.createElement('div');c.className='chip';c.textContent=k;kw.appendChild(c);});
-    (j.missing_keywords||[]).forEach(k=>{const c=document.createElement('div');c.className='chip miss';c.textContent='+ '+k;kw.appendChild(c);});
-  } catch(e){document.getElementById('li-headline').textContent='Error generating LinkedIn optimization.';}
-}
-
-// ══════════════════════════════════════════
-// REVISION CHAT
-// ══════════════════════════════════════════
-async function sendRevision(){
-  const inp=document.getElementById('chat-in');
-  const msg=inp.value.trim(); if(!msg) return;
-  if(!generatedCV){addMsg('ai','Please generate your CV first using the form on the left!');return;}
-  addMsg('hu',msg); inp.value='';
-
-  const typing=addMsg('ai','✦ Revising…');
-  chatHistory.push({role:'user',content:`Revision request: "${msg}"\n\nCurrent CV:\n${generatedCV}\n\nApply the requested changes and return ONLY the updated CV.`});
-
-  try {
-    const res=await callClaude(null,1000,chatHistory);
-    typing.querySelector('.bubble').textContent='✅ CV updated! Switched to CV tab.';
-    generatedCV=res; chatHistory.push({role:'assistant',content:res});
-    renderCV(res); showTab('cv');
-  } catch(e){typing.querySelector('.bubble').textContent='Error. Please try again.';}
-}
-
-function addMsg(role,text){
-  const c=document.getElementById('chat-msgs');
-  const el=document.createElement('div'); el.className='msg '+role;
-  el.innerHTML=`<div class="av">${role==='ai'?'✦':'👤'}</div><div class="bubble">${text}</div>`;
-  c.appendChild(el); c.scrollTop=c.scrollHeight; return el;
-}
-
-// ══════════════════════════════════════════
-// PDF DOWNLOAD
-// ══════════════════════════════════════════
-function downloadPDF(){
-  if(!generatedCV){alert('Generate your CV first!');return;}
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({unit:'mm',format:'a4'});
-  const name=document.getElementById('f-name').value||'CV';
-  const lines=generatedCV.replace(/[#*`]/g,'').split('\n').filter(l=>l.trim());
-  doc.setFont('helvetica');
-  let y=20; const lm=18,mw=174,ph=280;
-
-  lines.forEach(line=>{
-    if(y>ph){doc.addPage();y=20;}
-    const t=line.trim(); if(!t){y+=2.5;return;}
-
-    if(t.startsWith('##')){
-      y+=2;
-      doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(120,95,20);
-      doc.text(t.replace(/^#+\s*/,'').toUpperCase(),lm,y);
-      doc.setDrawColor(190,155,40);doc.line(lm,y+1.5,lm+mw,y+1.5);
-      y+=7;
-    } else if(t.startsWith('#')){
-      doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(15,15,25);
-      doc.text(t.replace(/^#+\s*/,''),lm,y);y+=9;
-    } else if(t.startsWith('-')){
-      doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(55,55,65);
-      const sp=doc.splitTextToSize('• '+t.replace(/^-\s*/,''),mw-6);
-      doc.text(sp,lm+4,y);y+=sp.length*4.5+1;
-    } else {
-      doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(35,35,45);
-      const sp=doc.splitTextToSize(t,mw);
-      doc.text(sp,lm,y);y+=sp.length*4.5+1;
-    }
-  });
-
-  doc.save(name.replace(/\s+/g,'_')+'_CV.pdf');
-}
-
-// ══════════════════════════════════════════
-// ══════════════════════════════════════════
-// SECURE API — Calls Vercel backend
-// API key is NEVER exposed in browser
-// ══════════════════════════════════════════
-async function callAPI(type, payload){
-  const res = await fetch('/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type, data: payload })
-  });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
-  return json.result;
-}
-
-async function callClaude(prompt, maxTokens=1000, messages=null){
-  // Used only for revision chat (passes message history)
-  if (messages) return callAPI('revision', { messages });
-  throw new Error('Use callAPI(type, data) directly');
-}
-</script>
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Temel ayarlar ve fontlar (Latin karakter destekli)
+            doc.setFont("helvetica");
+            doc.setFontSize(11);
+            
+            // Metni PDF sayfasına sığacak şekilde böl
+            const splitText = doc.splitTextToSize(text, 180);
+            
+            let y = 20;
+            for(let i = 0; i < splitText.length; i++){
+                if (y > 280) { // Sayfa sonuna gelince yeni sayfa aç
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(splitText[i], 15, y);
+                y += 6;
+            }
+            
+            doc.save("GhostSaaS_Premium_CV.pdf");
+        }
+    </script>
 </body>
 </html>
