@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The GhostSaaS | Premium AI Agency OS</title>
+    <title>GhostSaaS | Enterprise CV AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,122 +11,146 @@
             theme: {
                 extend: {
                     colors: {
-                        ghost: { 900: '#0a0a0c', 800: '#141417', blue: '#3b82f6', purple: '#8b5cf6' }
+                        background: '#000000',
+                        surface: '#0A0A0A',
+                        surfaceBorder: '#222222',
+                        primary: '#FFFFFF',
+                        secondary: '#888888',
+                        accent: '#0070F3' // Vercel Mavisi
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #ffffff; }
-        .glass-panel { background: rgba(20, 20, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .neon-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .loader { border-top-color: #8b5cf6; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0c; }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+        body { background-color: #000000; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+        .input-field { background: #0A0A0A; border: 1px solid #222222; color: #FFFFFF; transition: all 0.2s ease; }
+        .input-field:focus { border-color: #555555; outline: none; box-shadow: 0 0 0 1px #555555; }
+        .btn-primary { background: #FFFFFF; color: #000000; transition: all 0.2s; }
+        .btn-primary:hover { background: #EAEAEA; transform: translateY(-1px); }
+        .btn-secondary { background: #0A0A0A; border: 1px solid #222222; color: #FFFFFF; transition: all 0.2s; }
+        .btn-secondary:hover { background: #111111; border-color: #444444; }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555555; }
+        
+        .loader { border: 2px solid #000; border-top-color: transparent; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen flex">
+<body class="h-screen flex flex-col overflow-hidden selection:bg-accent selection:text-white">
 
-    <aside class="w-64 glass-panel border-r hidden md:flex flex-col p-6">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-500 flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.5)]">G</div>
-            <div>
-                <h1 class="font-bold tracking-wider text-sm">GhostSaaS</h1>
-                <p class="text-xs text-gray-400">AI Engine OS</p>
+    <header class="h-16 border-b border-surfaceBorder flex items-center justify-between px-8 bg-background z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-white rounded-sm flex items-center justify-center">
+                <span class="text-black font-bold text-xs">G</span>
             </div>
+            <h1 class="font-medium tracking-tight">GhostSaaS <span class="text-secondary font-normal ml-2">Enterprise OS</span></h1>
         </div>
-        
-        <nav class="space-y-2 flex-1">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-lg text-blue-400 border border-blue-500/30">
-                <span class="text-lg">📄</span> CV Oluşturucu
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-lg text-gray-400 transition">
-                <span class="text-lg">✉️</span> Kapak Mektubu
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-lg text-gray-400 transition">
-                <span class="text-lg">🔗</span> LinkedIn Optimize
-            </a>
-        </nav>
-        
-        <div class="pt-4 border-t border-white/10 text-xs text-gray-500 text-center">
-            GhostSaaS v1.0.0 <br> Premium License Active
+        <div class="flex items-center gap-4 text-sm text-secondary">
+            <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> API Active</span>
         </div>
-    </aside>
+    </header>
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="glass-panel border-b px-8 py-4 flex justify-between items-center">
+    <main class="flex-1 flex overflow-hidden">
+        
+        <aside class="w-full lg:w-[450px] border-r border-surfaceBorder bg-surface p-8 overflow-y-auto flex flex-col gap-6">
             <div>
-                <h2 class="text-xl font-bold neon-text">İçerik Stüdyosu</h2>
-                <p class="text-xs text-gray-400">Yapay zeka ile saniyeler içinde global formatta içerik üretin.</p>
+                <h2 class="text-lg font-medium mb-1">Global İçerik Motoru</h2>
+                <p class="text-sm text-secondary">Aday verilerini girin ve hedef pazara uygun içerik üretin.</p>
             </div>
-            <div class="flex gap-4">
-                <select id="langSelect" class="bg-ghost-800 border border-gray-700 text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    <option value="English">🇬🇧 English</option>
-                    <option value="Türkçe">🇹🇷 Türkçe</option>
-                    <option value="German">🇩🇪 Deutsch</option>
-                </select>
-            </div>
-        </header>
 
-        <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-panel rounded-2xl p-6 space-y-5 h-fit">
-                <h3 class="text-lg font-semibold border-b border-gray-700 pb-3">Profil Bilgileri</h3>
-                
-                <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4 pb-4 border-b border-surfaceBorder">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Ad Soyad</label>
-                        <input type="text" id="inputName" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition" placeholder="John Doe">
+                        <label class="block text-xs text-secondary mb-1.5 uppercase tracking-wider">Çıktı Dili</label>
+                        <select id="langSelect" class="input-field w-full rounded-md px-3 py-2 text-sm appearance-none cursor-pointer">
+                            <option value="English">🇬🇧 English</option>
+                            <option value="Türkçe">🇹🇷 Türkçe</option>
+                            <option value="German">🇩🇪 Deutsch (Almanca)</option>
+                            <option value="Spanish">🇪🇸 Español (İspanyolca)</option>
+                            <option value="French">🇫🇷 Français (Fransızca)</option>
+                            <option value="Italian">🇮🇹 Italiano (İtalyanca)</option>
+                            <option value="Dutch">🇳🇱 Nederlands (Felemenkçe)</option>
+                            <option value="Portuguese">🇵🇹 Português (Portekizce)</option>
+                            <option value="Russian">🇷🇺 Русский (Rusça)</option>
+                            <option value="Arabic">🇦🇪 العربية (Arapça)</option>
+                            <option value="Chinese">🇨🇳 中文 (Çince)</option>
+                            <option value="Japanese">🇯🇵 日本語 (Japonca)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Hedef Pozisyon</label>
-                        <input type="text" id="inputPosition" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition" placeholder="Senior Developer">
+                        <label class="block text-xs text-secondary mb-1.5 uppercase tracking-wider">Hedef Ülke</label>
+                        <input list="countries" id="inputCountry" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Örn: Germany">
+                        <datalist id="countries">
+                            <option value="United States"><option value="United Kingdom"><option value="Germany"><option value="Canada">
+                            <option value="Australia"><option value="Netherlands"><option value="France"><option value="Switzerland">
+                            <option value="Sweden"><option value="Norway"><option value="Denmark"><option value="United Arab Emirates">
+                            <option value="Turkey"><option value="Singapore"><option value="Japan"><option value="Remote / Global">
+                        </datalist>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Sektör</label>
-                        <input type="text" id="inputSector" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition" placeholder="Teknoloji">
+                        <label class="block text-xs text-secondary mb-1.5">Ad Soyad</label>
+                        <input type="text" id="inputName" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="John Doe">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Hedef Ülke</label>
-                        <input type="text" id="inputCountry" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition" placeholder="USA, Germany vb.">
+                        <label class="block text-xs text-secondary mb-1.5">Pozisyon</label>
+                        <input type="text" id="inputPosition" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Product Manager">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Yetenekler (Virgülle Ayırın)</label>
-                    <input type="text" id="inputSkills" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition" placeholder="Next.js, Python, Leadership">
+                    <label class="block text-xs text-secondary mb-1.5">Sektör</label>
+                    <input type="text" id="inputSector" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Fintech / Software">
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Geçmiş Deneyimler & Başarılar</label>
-                    <textarea id="inputExp" rows="4" class="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none transition resize-none" placeholder="Geçmiş şirketlerinizi ve neler başardığınızı kısaca yazın."></textarea>
+                    <label class="block text-xs text-secondary mb-1.5">Anahtar Yetenekler</label>
+                    <input type="text" id="inputSkills" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Agile, Python, B2B Sales...">
                 </div>
 
-                <button id="generateBtn" onclick="generateContent()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-[0_0_20px_rgba(139,92,246,0.3)] flex justify-center items-center gap-2">
-                    <span id="btnText">Yapay Zeka ile Üret 🚀</span>
-                    <div id="btnLoader" class="hidden w-5 h-5 border-2 border-white border-solid rounded-full loader"></div>
+                <div>
+                    <label class="block text-xs text-secondary mb-1.5">Kısa Geçmiş & Başarılar</label>
+                    <textarea id="inputExp" rows="5" class="input-field w-full rounded-md px-3 py-2 text-sm resize-none" placeholder="Geçmiş deneyimleri, alınan sorumlulukları ve başarıları metriklerle yazın..."></textarea>
+                </div>
+
+                <button id="generateBtn" onclick="generateContent()" class="btn-primary w-full py-2.5 rounded-md font-medium text-sm flex items-center justify-center gap-2 mt-2">
+                    <span id="btnText">İçeriği Oluştur</span>
+                    <div id="btnLoader" class="loader hidden"></div>
                 </button>
             </div>
+        </aside>
 
-            <div class="glass-panel rounded-2xl p-6 flex flex-col">
-                <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
-                    <h3 class="text-lg font-semibold">AI Çıktısı</h3>
-                    <button onclick="downloadPDF()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md transition flex items-center gap-2">
-                        📥 PDF İndir
-                    </button>
-                </div>
-                <div id="outputArea" class="flex-1 bg-black/30 rounded-lg p-5 overflow-y-auto font-mono text-sm text-gray-300 leading-relaxed whitespace-pre-wrap border border-gray-800">
-                    Sisteme bilgilerinizi girin ve "Üret" butonuna basın...
+        <section class="flex-1 flex flex-col bg-background relative">
+            <div class="h-14 border-b border-surfaceBorder flex items-center justify-between px-6 bg-surface/50 backdrop-blur-md absolute top-0 w-full z-10">
+                <span class="text-xs text-secondary font-mono">output.md</span>
+                <button onclick="downloadPDF()" class="btn-secondary px-3 py-1.5 rounded text-xs flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    PDF Olarak Kaydet
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto pt-20 pb-10 px-8 lg:px-16">
+                <div id="outputArea" class="max-w-3xl mx-auto font-mono text-sm leading-loose text-gray-300 whitespace-pre-wrap">
+// Sistem Hazır.
+// Sol panelden verileri girip motoru başlatın.
+// GhostSaaS Enterprise AI, global ATS standartlarına uygun içeriği buraya derleyecektir...
                 </div>
             </div>
-        </div>
+        </section>
+
     </main>
 
     <script>
@@ -137,7 +161,7 @@
             const outputArea = document.getElementById('outputArea');
 
             const data = {
-                name: document.getElementById('inputName').value || 'Müşteri',
+                name: document.getElementById('inputName').value || 'Aday',
                 position: document.getElementById('inputPosition').value || 'Profesyonel',
                 sector: document.getElementById('inputSector').value || 'Genel',
                 country: document.getElementById('inputCountry').value || 'Global',
@@ -147,12 +171,12 @@
             };
 
             btn.disabled = true;
-            btnText.innerText = "Yapay Zeka Analiz Ediyor...";
+            btnText.innerText = "İşleniyor...";
             btnLoader.classList.remove('hidden');
-            outputArea.innerText = "GhostSaaS AI Motoru çalışıyor. Lütfen bekleyin...";
+            outputArea.innerText = "> Hedef pazar (" + data.country + ") analiz ediliyor...\n> Dil motoru (" + data.lang + ") başlatıldı...\n> Lütfen bekleyin.";
 
             try {
-                // KESİN ÇÖZÜM: .js uzantısı kaldırıldı. Vercel sadece bu şekilde kabul eder!
+                // Daha önce düzelttiğimiz çalışan rotasyon
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -164,31 +188,35 @@
                 if (response.ok && result.text) {
                     outputArea.innerText = result.text;
                 } else {
-                    outputArea.innerText = "Sunucu Hatası: " + (result.error || "Anthropic API Yanıt Vermedi.");
+                    outputArea.innerText = "Sunucu Hatası: " + (result.error || "Yanıt alınamadı.");
                 }
             } catch (error) {
                 console.error(error);
-                outputArea.innerText = "Bağlantı hatası! Motor henüz Vercel'de hazır olmayabilir.";
+                outputArea.innerText = "Bağlantı hatası! Sistemin Vercel üzerinde aktif olduğundan emin olun.";
             } finally {
                 btn.disabled = false;
-                btnText.innerText = "Yapay Zeka ile Üret 🚀";
+                btnText.innerText = "İçeriği Oluştur";
                 btnLoader.classList.add('hidden');
             }
         }
 
         function downloadPDF() {
             const text = document.getElementById('outputArea').innerText;
-            if(!text || text.includes("GhostSaaS AI Motoru")) return alert("Önce CV üretin!");
+            if(!text || text.includes("Sistem Hazır")) return alert("Önce içerik üretin!");
+            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFont("helvetica"); doc.setFontSize(11);
+            
+            doc.setFont("helvetica"); 
+            doc.setFontSize(10);
+            
             const splitText = doc.splitTextToSize(text, 180);
             let y = 20;
             for(let i = 0; i < splitText.length; i++){
                 if (y > 280) { doc.addPage(); y = 20; }
-                doc.text(splitText[i], 15, y); y += 6;
+                doc.text(splitText[i], 15, y); y += 5;
             }
-            doc.save("GhostSaaS_Premium_CV.pdf");
+            doc.save("GhostSaaS_Enterprise_Export.pdf");
         }
     </script>
 </body>
