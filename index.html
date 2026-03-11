@@ -157,11 +157,11 @@
             btn.disabled = true;
             btnText.innerText = "Yapay Zeka Analiz Ediyor...";
             btnLoader.classList.remove('hidden');
-            outputArea.innerText = "GhostSaaS AI Motoru çalışıyor. Lütfen bekleyin...\n\n(Backend ile iletişim kuruluyor: /api/generate)";
+            outputArea.innerText = "GhostSaaS AI Motoru çalışıyor. Lütfen bekleyin...";
 
             try {
-                // Senin backend API'ne güvenli POST isteği atıyoruz
-                const response = await fetch('/api/generate', {
+                // HATA BURADAN ÇÖZÜLDÜ: .js uzantısı eklendi!
+                const response = await fetch('/api/generate.js', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'cv', data: data })
@@ -185,7 +185,7 @@
             }
         }
 
-        // PDF İndirme Fonksiyonu (jsPDF Entegrasyonu)
+        // PDF İndirme Fonksiyonu
         function downloadPDF() {
             const text = document.getElementById('outputArea').innerText;
             if(!text || text.includes("GhostSaaS AI Motoru")) {
@@ -196,16 +196,14 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Temel ayarlar ve fontlar (Latin karakter destekli)
             doc.setFont("helvetica");
             doc.setFontSize(11);
             
-            // Metni PDF sayfasına sığacak şekilde böl
             const splitText = doc.splitTextToSize(text, 180);
             
             let y = 20;
             for(let i = 0; i < splitText.length; i++){
-                if (y > 280) { // Sayfa sonuna gelince yeni sayfa aç
+                if (y > 280) { 
                     doc.addPage();
                     y = 20;
                 }
