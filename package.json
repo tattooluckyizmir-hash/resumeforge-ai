@@ -1,6 +1,8 @@
 {
+  "name": "ghostsaas-cv",
+  "version": "1.0.0",
   "type": "module",
-  "dependencies": {
-    "next": "latest"
+  "engines": {
+    "node": "20.x"
   }
 }
