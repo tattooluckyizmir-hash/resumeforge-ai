@@ -1,26 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
+  "functions": {
+    "generate.js": {
+      "runtime": "@vercel/node"
     }
-  ],
+  },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/generate",
+      "dest": "/generate.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/index.html"
     }
-  ],
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic-api-key"
-  }
+  ]
 }
