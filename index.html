@@ -1,222 +1,167 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostSaaS | Enterprise CV AI</title>
+    <title>Görsel CV Stüdyosu | Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        background: '#000000',
-                        surface: '#0A0A0A',
-                        surfaceBorder: '#222222',
-                        primary: '#FFFFFF',
-                        secondary: '#888888',
-                        accent: '#0070F3' // Vercel Mavisi
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #000000; color: #FFFFFF; font-family: 'Inter', sans-serif; }
-        .input-field { background: #0A0A0A; border: 1px solid #222222; color: #FFFFFF; transition: all 0.2s ease; }
-        .input-field:focus { border-color: #555555; outline: none; box-shadow: 0 0 0 1px #555555; }
-        .btn-primary { background: #FFFFFF; color: #000000; transition: all 0.2s; }
-        .btn-primary:hover { background: #EAEAEA; transform: translateY(-1px); }
-        .btn-secondary { background: #0A0A0A; border: 1px solid #222222; color: #FFFFFF; transition: all 0.2s; }
-        .btn-secondary:hover { background: #111111; border-color: #444444; }
-        
-        /* Modern Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555555; }
-        
-        .loader { border: 2px solid #000; border-top-color: transparent; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        /* Gerçek bir A4 Kağıdı Görünümü */
+        #cv-preview { 
+            width: 210mm; min-height: 297mm; background: white; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin: 0 auto; 
+            display: flex; overflow: hidden;
+        }
+        .left-col { width: 35%; background: #1e293b; color: white; padding: 30px; }
+        .right-col { width: 65%; padding: 40px; color: #333; }
+        .photo-container { width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 4px solid #3b82f6; margin: 0 auto 20px auto; background: #cbd5e1; }
+        .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden selection:bg-accent selection:text-white">
+<body class="flex flex-col lg:flex-row h-screen overflow-hidden">
 
-    <header class="h-16 border-b border-surfaceBorder flex items-center justify-between px-8 bg-background z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-6 h-6 bg-white rounded-sm flex items-center justify-center">
-                <span class="text-black font-bold text-xs">G</span>
-            </div>
-            <h1 class="font-medium tracking-tight">GhostSaaS <span class="text-secondary font-normal ml-2">Enterprise OS</span></h1>
-        </div>
-        <div class="flex items-center gap-4 text-sm text-secondary">
-            <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div> API Active</span>
-        </div>
-    </header>
-
-    <main class="flex-1 flex overflow-hidden">
+    <aside class="w-full lg:w-1/3 bg-white border-r border-gray-200 p-6 overflow-y-auto z-10 shadow-lg">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">CV Oluşturucu 🎨</h2>
         
-        <aside class="w-full lg:w-[450px] border-r border-surfaceBorder bg-surface p-8 overflow-y-auto flex flex-col gap-6">
-            <div>
-                <h2 class="text-lg font-medium mb-1">Global İçerik Motoru</h2>
-                <p class="text-sm text-secondary">Aday verilerini girin ve hedef pazara uygun içerik üretin.</p>
+        <div class="space-y-4">
+            <div class="p-4 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50 text-center">
+                <label class="block text-sm font-medium text-blue-700 mb-2 cursor-pointer">
+                    📸 Vesikalık / Profil Fotoğrafı Yükle
+                    <input type="file" id="photoUpload" accept="image/*" class="hidden" onchange="previewPhoto(event)">
+                </label>
             </div>
 
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4 pb-4 border-b border-surfaceBorder">
-                    <div>
-                        <label class="block text-xs text-secondary mb-1.5 uppercase tracking-wider">Çıktı Dili</label>
-                        <select id="langSelect" class="input-field w-full rounded-md px-3 py-2 text-sm appearance-none cursor-pointer">
-                            <option value="English">🇬🇧 English</option>
-                            <option value="Türkçe">🇹🇷 Türkçe</option>
-                            <option value="German">🇩🇪 Deutsch (Almanca)</option>
-                            <option value="Spanish">🇪🇸 Español (İspanyolca)</option>
-                            <option value="French">🇫🇷 Français (Fransızca)</option>
-                            <option value="Italian">🇮🇹 Italiano (İtalyanca)</option>
-                            <option value="Dutch">🇳🇱 Nederlands (Felemenkçe)</option>
-                            <option value="Portuguese">🇵🇹 Português (Portekizce)</option>
-                            <option value="Russian">🇷🇺 Русский (Rusça)</option>
-                            <option value="Arabic">🇦🇪 العربية (Arapça)</option>
-                            <option value="Chinese">🇨🇳 中文 (Çince)</option>
-                            <option value="Japanese">🇯🇵 日本語 (Japonca)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-secondary mb-1.5 uppercase tracking-wider">Hedef Ülke</label>
-                        <input list="countries" id="inputCountry" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Örn: Germany">
-                        <datalist id="countries">
-                            <option value="United States"><option value="United Kingdom"><option value="Germany"><option value="Canada">
-                            <option value="Australia"><option value="Netherlands"><option value="France"><option value="Switzerland">
-                            <option value="Sweden"><option value="Norway"><option value="Denmark"><option value="United Arab Emirates">
-                            <option value="Turkey"><option value="Singapore"><option value="Japan"><option value="Remote / Global">
-                        </datalist>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-secondary mb-1.5">Ad Soyad</label>
-                        <input type="text" id="inputName" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="John Doe">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-secondary mb-1.5">Pozisyon</label>
-                        <input type="text" id="inputPosition" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Product Manager">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-secondary mb-1.5">Sektör</label>
-                    <input type="text" id="inputSector" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Fintech / Software">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-secondary mb-1.5">Anahtar Yetenekler</label>
-                    <input type="text" id="inputSkills" class="input-field w-full rounded-md px-3 py-2 text-sm" placeholder="Agile, Python, B2B Sales...">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-secondary mb-1.5">Kısa Geçmiş & Başarılar</label>
-                    <textarea id="inputExp" rows="5" class="input-field w-full rounded-md px-3 py-2 text-sm resize-none" placeholder="Geçmiş deneyimleri, alınan sorumlulukları ve başarıları metriklerle yazın..."></textarea>
-                </div>
-
-                <button id="generateBtn" onclick="generateContent()" class="btn-primary w-full py-2.5 rounded-md font-medium text-sm flex items-center justify-center gap-2 mt-2">
-                    <span id="btnText">İçeriği Oluştur</span>
-                    <div id="btnLoader" class="loader hidden"></div>
-                </button>
-            </div>
-        </aside>
-
-        <section class="flex-1 flex flex-col bg-background relative">
-            <div class="h-14 border-b border-surfaceBorder flex items-center justify-between px-6 bg-surface/50 backdrop-blur-md absolute top-0 w-full z-10">
-                <span class="text-xs text-secondary font-mono">output.md</span>
-                <button onclick="downloadPDF()" class="btn-secondary px-3 py-1.5 rounded text-xs flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    PDF Olarak Kaydet
-                </button>
+            <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="inputName" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ad Soyad" onkeyup="updatePreview()">
+                <input type="text" id="inputPosition" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Meslek/Pozisyon" onkeyup="updatePreview()">
             </div>
             
-            <div class="flex-1 overflow-y-auto pt-20 pb-10 px-8 lg:px-16">
-                <div id="outputArea" class="max-w-3xl mx-auto font-mono text-sm leading-loose text-gray-300 whitespace-pre-wrap">
-// Sistem Hazır.
-// Sol panelden verileri girip motoru başlatın.
-// GhostSaaS Enterprise AI, global ATS standartlarına uygun içeriği buraya derleyecektir...
+            <input type="text" id="inputEmail" class="w-full border rounded-lg p-2 text-sm outline-none" placeholder="E-posta Adresi" onkeyup="updatePreview()">
+            <input type="text" id="inputSkills" class="w-full border rounded-lg p-2 text-sm outline-none" placeholder="Yetenekler (Virgülle ayırın)" onkeyup="updatePreview()">
+            
+            <textarea id="inputExp" rows="3" class="w-full border rounded-lg p-2 text-sm outline-none" placeholder="Kısaca deneyimlerinizden bahsedin (Yapay Zeka bunu genişletecek)"></textarea>
+
+            <select id="langSelect" class="w-full border rounded-lg p-2 text-sm outline-none">
+                <option value="Türkçe">🇹🇷 Türkçe Çıktı Al</option>
+                <option value="English">🇬🇧 İngilizce Çıktı Al</option>
+            </select>
+
+            <button onclick="generateAI()" id="genBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 transition">
+                <span id="btnText">Yapay Zeka ile Metinleri Yaz ✨</span>
+                <div id="loader" class="loader hidden"></div>
+            </button>
+
+            <button onclick="downloadPDF()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition mt-2">
+                📥 Harika Tasarımı PDF İndir
+            </button>
+        </div>
+    </aside>
+
+    <main class="w-full lg:w-2/3 bg-gray-100 p-8 overflow-y-auto flex justify-center">
+        <div id="cv-preview">
+            
+            <div class="left-col">
+                <div class="photo-container">
+                    <img id="cvPhoto" src="https://via.placeholder.com/150?text=Fotoğraf" alt="Profil">
+                </div>
+                
+                <h3 class="text-lg font-bold border-b border-gray-600 pb-2 mb-3 mt-8 uppercase">İletişim</h3>
+                <p id="cvEmail" class="text-sm text-gray-300 break-words">ornek@mail.com</p>
+
+                <h3 class="text-lg font-bold border-b border-gray-600 pb-2 mb-3 mt-8 uppercase">Yetenekler</h3>
+                <p id="cvSkills" class="text-sm text-gray-300 leading-relaxed">Yeteneklerinizi forma girin...</p>
+            </div>
+
+            <div class="right-col">
+                <h1 id="cvName" class="text-5xl font-bold text-gray-800 tracking-tight">İsim Soyisim</h1>
+                <h2 id="cvPosition" class="text-xl font-medium text-blue-600 mt-2 uppercase tracking-widest">Meslek Pozisyonu</h2>
+                
+                <div class="mt-10">
+                    <div id="aiContent" class="text-gray-600 leading-relaxed space-y-4">
+                        <p class="italic text-gray-400">"Yapay Zeka ile Metinleri Yaz" butonuna tıkladığınızda, profesyonel özetiniz ve deneyimleriniz buraya kusursuz bir şekilde yerleştirilecektir...</p>
+                    </div>
                 </div>
             </div>
-        </section>
 
+        </div>
     </main>
 
     <script>
-        async function generateContent() {
-            const btn = document.getElementById('generateBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoader = document.getElementById('btnLoader');
-            const outputArea = document.getElementById('outputArea');
+        // Formu doldurdukça A4 kağıdını anında güncelleyen sistem
+        function updatePreview() {
+            document.getElementById('cvName').innerText = document.getElementById('inputName').value || 'İsim Soyisim';
+            document.getElementById('cvPosition').innerText = document.getElementById('inputPosition').value || 'Meslek Pozisyonu';
+            document.getElementById('cvEmail').innerText = document.getElementById('inputEmail').value || 'ornek@mail.com';
+            
+            const skills = document.getElementById('inputSkills').value;
+            document.getElementById('cvSkills').innerHTML = skills ? skills.split(',').map(s => `• ${s.trim()}<br>`).join('') : 'Yeteneklerinizi forma girin...';
+        }
 
-            const data = {
-                name: document.getElementById('inputName').value || 'Aday',
-                position: document.getElementById('inputPosition').value || 'Profesyonel',
-                sector: document.getElementById('inputSector').value || 'Genel',
-                country: document.getElementById('inputCountry').value || 'Global',
-                skills: document.getElementById('inputSkills').value || '',
-                achievements: document.getElementById('inputExp').value || '',
-                lang: document.getElementById('langSelect').value
-            };
-
-            btn.disabled = true;
-            btnText.innerText = "İşleniyor...";
-            btnLoader.classList.remove('hidden');
-            outputArea.innerText = "> Hedef pazar (" + data.country + ") analiz ediliyor...\n> Dil motoru (" + data.lang + ") başlatıldı...\n> Lütfen bekleyin.";
-
-            try {
-                // Daha önce düzelttiğimiz çalışan rotasyon
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'cv', data: data })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.text) {
-                    outputArea.innerText = result.text;
-                } else {
-                    outputArea.innerText = "Sunucu Hatası: " + (result.error || "Yanıt alınamadı.");
-                }
-            } catch (error) {
-                console.error(error);
-                outputArea.innerText = "Bağlantı hatası! Sistemin Vercel üzerinde aktif olduğundan emin olun.";
-            } finally {
-                btn.disabled = false;
-                btnText.innerText = "İçeriği Oluştur";
-                btnLoader.classList.add('hidden');
+        // Fotoğraf Yükleme Sistemi
+        function previewPhoto(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('cvPhoto').src = reader.result;
+            }
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
             }
         }
 
-        function downloadPDF() {
-            const text = document.getElementById('outputArea').innerText;
-            if(!text || text.includes("Sistem Hazır")) return alert("Önce içerik üretin!");
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFont("helvetica"); 
-            doc.setFontSize(10);
-            
-            const splitText = doc.splitTextToSize(text, 180);
-            let y = 20;
-            for(let i = 0; i < splitText.length; i++){
-                if (y > 280) { doc.addPage(); y = 20; }
-                doc.text(splitText[i], 15, y); y += 5;
+        // Yapay Zeka Motorunu Tetikleme
+        async function generateAI() {
+            const btn = document.getElementById('genBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const aiContent = document.getElementById('aiContent');
+
+            const data = {
+                name: document.getElementById('inputName').value,
+                position: document.getElementById('inputPosition').value,
+                skills: document.getElementById('inputSkills').value,
+                achievements: document.getElementById('inputExp').value,
+                lang: document.getElementById('langSelect').value
+            };
+
+            btn.disabled = true; loader.classList.remove('hidden'); btnText.innerText = "Yapay Zeka Yazıyor...";
+
+            try {
+                // Yeni doğru klasör yapısına (/api/generate) istek atıyoruz
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    aiContent.innerHTML = result.text; // AI'dan gelen HTML'i tasarıma yerleştir
+                } else {
+                    alert("Hata: " + result.error);
+                }
+            } catch (error) {
+                alert("Bağlantı Hatası! Vercel'in güncellenmesi için 1 dakika bekleyip tekrar deneyin.");
+            } finally {
+                btn.disabled = false; loader.classList.add('hidden'); btnText.innerText = "Yapay Zeka ile Metinleri Yaz ✨";
             }
-            doc.save("GhostSaaS_Enterprise_Export.pdf");
+        }
+
+        // Harika Görseli PDF Olarak İndirme (html2pdf motoru)
+        function downloadPDF() {
+            const element = document.getElementById('cv-preview');
+            const opt = {
+                margin:       0,
+                filename:     'Profesyonel_CV.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
